@@ -17,15 +17,46 @@
 package org.drools.workbench.screens.scenario.client.editor;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
+import org.drools.workbench.screens.scenario.client.resources.i18n.ScenarioEditorConstants;
+import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.constants.IconType;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.kie.workbench.common.widgets.metadata.client.KieEditorViewImpl;
+
 
 @Templated
 @Dependent
 public class ScenarioEditorViewImpl
         extends KieEditorViewImpl
         implements ScenarioEditorView {
+
+    @DataField("addDataObjectButton")
+    Button addDataObjectButton;
+
+    private TranslationService translationService;
+
+    public ScenarioEditorViewImpl(){
+    }
+
+    @Inject
+    public ScenarioEditorViewImpl(final Button addDataObjectButton, final TranslationService translationService) {
+        this.addDataObjectButton = addDataObjectButton;
+        this.translationService = translationService;
+
+        setup();
+
+        // Hide/disable the following until content is loaded
+        addDataObjectButton.setEnabled( false );
+    }
+
+    private void setup() {
+        addDataObjectButton.setText( translationService.getTranslation( ScenarioEditorConstants.ScenarioEditorViewImplAddDataObject ) );
+        addDataObjectButton.setIcon( IconType.PLUS );
+    }
 
     @Override
     public void setContent() {
