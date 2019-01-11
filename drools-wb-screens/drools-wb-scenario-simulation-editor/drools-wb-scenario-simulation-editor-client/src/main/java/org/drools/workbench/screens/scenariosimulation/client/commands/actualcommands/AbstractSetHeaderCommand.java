@@ -32,7 +32,7 @@ import static org.drools.workbench.screens.scenariosimulation.model.FactMapping.
  * <b>Abstract</b> <code>Command</code> class to provide common methods used by actual implementations
  */
 public abstract class AbstractSetHeaderCommand extends AbstractScenarioSimulationCommand {
-    
+
     private FactIdentifier factIdentifier;
     private AbstractSetHeaderCommandHelper commandHelper;
 
@@ -80,7 +80,7 @@ public abstract class AbstractSetHeaderCommand extends AbstractScenarioSimulatio
         propertyHeaderMetaData.setTitle(title);
         propertyHeaderMetaData.setReadOnly(false);
     }
-
+    
     protected void setInstanceHeader(ScenarioSimulationContext context) {
         commandHelper = new AbstractSetHeaderCommandHelper(context);
 
