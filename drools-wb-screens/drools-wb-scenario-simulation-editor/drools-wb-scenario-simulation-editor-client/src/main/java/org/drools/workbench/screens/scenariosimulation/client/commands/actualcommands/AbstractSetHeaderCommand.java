@@ -17,7 +17,6 @@ package org.drools.workbench.screens.scenariosimulation.client.commands.actualco
 
 import java.util.Optional;
 
-import org.drools.core.factmodel.Fact;
 import org.drools.workbench.screens.scenariosimulation.client.commands.ScenarioSimulationContext;
 import org.drools.workbench.screens.scenariosimulation.client.metadata.ScenarioHeaderMetaData;
 import org.drools.workbench.screens.scenariosimulation.client.resources.i18n.ScenarioSimulationEditorConstants;
@@ -36,31 +35,36 @@ public abstract class AbstractSetHeaderCommand extends AbstractScenarioSimulatio
         super(true);
     }
 
-    /**
-     * Sets the header for a particular instance.
-     * @param context
-     */
-    protected void setInstanceHeader(ScenarioSimulationContext context) {
-        final ScenarioSimulationContext.Status status = context.getStatus();
-        if (getSelectedColumn(context).isPresent()) {
-            ScenarioGridColumn selectedColumn = getSelectedColumn(context).get();
-            int columnIndex = context.getModel().getColumns().indexOf(selectedColumn);
-            String className = status.getClassName();
-            String canonicalClassName = getFullPackage(context) + className;
-            FactIdentifier factIdentifier = setEditableHeadersAndGetFactIdentifier(context, selectedColumn, className, canonicalClassName);
-            setInstanceHeaderMetaData(selectedColumn, className, factIdentifier);
-            final ScenarioHeaderMetaData propertyHeaderMetaData = selectedColumn.getPropertyHeaderMetaData();
-            setPropertyMetaData(propertyHeaderMetaData, getPropertyPlaceHolder(columnIndex), false, selectedColumn, ScenarioSimulationEditorConstants.INSTANCE.defineValidType());
-            context.getModel().updateColumnInstance(columnIndex, selectedColumn);
-        }
-        else {
-            return;
-        }
+    protected abstract void conditionalExecute(ScenarioSimulationContext context, ScenarioGridColumn selectedColumn);
 
+    @Override
+    protected void internalExecute(ScenarioSimulationContext context) {
+        getSelectedColumn(context).ifPresent(selectedColumn -> {
+                                                 conditionalExecute(context, selectedColumn);
+                                             }
+        );
     }
 
     /**
-     * Returns an <code>Optional<ScenarioGridColumn></code>.
+     * Sets the instance header for a <code>ScenarioSimulationContext</code>.
+     * @param context
+     * @param selectedColumn
+     */
+    protected void setInstanceHeader(ScenarioSimulationContext context, ScenarioGridColumn selectedColumn) {
+        final ScenarioSimulationContext.Status status = context.getStatus();
+
+        int columnIndex = context.getModel().getColumns().indexOf(selectedColumn);
+        String className = status.getClassName();
+        String canonicalClassName = getFullPackage(context) + className;
+        FactIdentifier factIdentifier = setEditableHeadersAndGetFactIdentifier(context, selectedColumn, className, canonicalClassName);
+        setInstanceHeaderMetaData(selectedColumn, className, factIdentifier);
+        final ScenarioHeaderMetaData propertyHeaderMetaData = selectedColumn.getPropertyHeaderMetaData();
+        setPropertyMetaData(propertyHeaderMetaData, getPropertyPlaceHolder(columnIndex), false, selectedColumn, ScenarioSimulationEditorConstants.INSTANCE.defineValidType());
+        context.getModel().updateColumnInstance(columnIndex, selectedColumn);
+    }
+
+    /**
+     * Returns an <code>Optional<ScenarioGridColumn></code> for a <code>ScenarioSimulationContext</code>.
      * @param context
      * @return
      */
@@ -120,6 +124,5 @@ public abstract class AbstractSetHeaderCommand extends AbstractScenarioSimulatio
         propertyHeaderMetaData.setTitle(title);
         propertyHeaderMetaData.setReadOnly(readOnly);
         selectedColumn.setPlaceHolder(placeHolder);
-
     }
 }

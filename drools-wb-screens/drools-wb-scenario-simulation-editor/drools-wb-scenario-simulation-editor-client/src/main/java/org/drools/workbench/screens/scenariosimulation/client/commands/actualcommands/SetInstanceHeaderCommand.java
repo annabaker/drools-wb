@@ -33,7 +33,7 @@ import static org.drools.workbench.screens.scenariosimulation.model.FactMapping.
 public class SetInstanceHeaderCommand extends AbstractSetHeaderCommand {
 
     @Override
-    protected void internalExecute(ScenarioSimulationContext context) {
-        setInstanceHeader(context);
+    protected void conditionalExecute(ScenarioSimulationContext context, ScenarioGridColumn selectedColumn) {
+        setInstanceHeader(context, selectedColumn);
     }
 }

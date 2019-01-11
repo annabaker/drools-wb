@@ -34,41 +34,31 @@ import static org.drools.workbench.screens.scenariosimulation.client.utils.Scena
 @Dependent
 public class SetPropertyHeaderCommand extends AbstractSetHeaderCommand {
 
-    public SetPropertyHeaderCommand() {
-        super();
-    }
-
     @Override
-    protected void internalExecute(ScenarioSimulationContext context) {
-        if (getSelectedColumn(context).isPresent()) {
-            ScenarioGridColumn selectedColumn = getSelectedColumn(context).get();
-            int columnIndex = context.getModel().getColumns().indexOf(selectedColumn);
-            String value = context.getStatus().getValue();
-            String title = value.contains(".") ? value.substring(value.indexOf(".") + 1) : "value";
-            String className = value.split("\\.")[0];
-            String canonicalClassName = getFullPackage(context) + className;
-            FactIdentifier factIdentifier = setEditableHeadersAndGetFactIdentifier(context, selectedColumn, className, canonicalClassName);
-            final GridData.Range instanceLimits = context.getModel().getInstanceLimits(columnIndex);
-            IntStream.range(instanceLimits.getMinRowIndex(), instanceLimits.getMaxRowIndex() + 1)
-                    .forEach(index -> {
-                        final ScenarioGridColumn scenarioGridColumn = (ScenarioGridColumn) context.getModel().getColumns().get(index);
-                        if (!scenarioGridColumn.isInstanceAssigned()) { // We have not defined the instance, yet
-                            setInstanceHeaderMetaData(scenarioGridColumn, className, factIdentifier);
-                        }
-                    });
-            selectedColumn.getPropertyHeaderMetaData().setColumnGroup(getPropertyMetaDataGroup(selectedColumn.getInformationHeaderMetaData().getColumnGroup()));
-            setPropertyMetaData(selectedColumn.getPropertyHeaderMetaData(), title, false, selectedColumn, ScenarioSimulationEditorConstants.INSTANCE.insertValue());
-            selectedColumn.setPropertyAssigned(true);
-            context.getModel().updateColumnProperty(columnIndex,
-                                                    selectedColumn,
-                                                    value,
-                                                    context.getStatus().getValueClassName(), context.getStatus().isKeepData());
-            if (context.getScenarioSimulationEditorPresenter() != null) {
-                context.getScenarioSimulationEditorPresenter().reloadRightPanel(false);
-            }
-        }
-        else {
-            return;
+    protected void conditionalExecute(ScenarioSimulationContext context, ScenarioGridColumn selectedColumn) {
+        int columnIndex = context.getModel().getColumns().indexOf(selectedColumn);
+        String value = context.getStatus().getValue();
+        String title = value.contains(".") ? value.substring(value.indexOf(".") + 1) : "value";
+        String className = value.split("\\.")[0];
+        String canonicalClassName = getFullPackage(context) + className;
+        FactIdentifier factIdentifier = setEditableHeadersAndGetFactIdentifier(context, selectedColumn, className, canonicalClassName);
+        final GridData.Range instanceLimits = context.getModel().getInstanceLimits(columnIndex);
+        IntStream.range(instanceLimits.getMinRowIndex(), instanceLimits.getMaxRowIndex() + 1)
+                .forEach(index -> {
+                    final ScenarioGridColumn scenarioGridColumn = (ScenarioGridColumn) context.getModel().getColumns().get(index);
+                    if (!scenarioGridColumn.isInstanceAssigned()) { // We have not defined the instance, yet
+                        setInstanceHeaderMetaData(scenarioGridColumn, className, factIdentifier);
+                    }
+                });
+        selectedColumn.getPropertyHeaderMetaData().setColumnGroup(getPropertyMetaDataGroup(selectedColumn.getInformationHeaderMetaData().getColumnGroup()));
+        setPropertyMetaData(selectedColumn.getPropertyHeaderMetaData(), title, false, selectedColumn, ScenarioSimulationEditorConstants.INSTANCE.insertValue());
+        selectedColumn.setPropertyAssigned(true);
+        context.getModel().updateColumnProperty(columnIndex,
+                                                selectedColumn,
+                                                value,
+                                                context.getStatus().getValueClassName(), context.getStatus().isKeepData());
+        if (context.getScenarioSimulationEditorPresenter() != null) {
+            context.getScenarioSimulationEditorPresenter().reloadRightPanel(false);
         }
     }
 }
